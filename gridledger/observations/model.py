@@ -55,9 +55,19 @@ class FluxRecord:
         return self.grid_id, self.cell_id, self.side, self.start, self.end
 
 @dataclass(frozen=True)
+class FluxFragment:
+    record: FluxRecord
+    start: Fraction
+    end: Fraction
+
+@dataclass(frozen=True)
 class ObservationRevision:
     id: int | None
     grid_id: int
     parent_id: int | None
     masses: tuple[MassRecord, ...]
     fluxes: tuple[FluxRecord, ...]
+    # None means untracked (archives written before corrections): every member
+    # is effective on its complete record interval. A tuple is authoritative:
+    # member sources without an entry have an empty effective domain.
+    flux_fragments: tuple[FluxFragment, ...] | None = None

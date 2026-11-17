@@ -46,6 +46,16 @@ revision creates a branch. Changing segment boundaries adds different logical
 keys; remove overlap from the input design or compile a different revision.
 The API never silently interprets a new interval as deletion of an old interval.
 
+To correct flow rates over a time window, call correct_fluxes with an explicit
+base revision. Each correction record covers the base revision's effective
+observations on its directed face over its own half-open interval, spanning old
+sources and filling gaps; mass members and out-of-window fragments are
+inherited unchanged. The ordinary put_observations entry still replaces full
+logical keys only: a matching key inherits exactly the replaced record's
+remaining effective fragments, and a fully hidden key joins as a new
+full-interval key. correction_cases.py --demo shows a correction, an
+ordinary-entry replacement, a reopen and real exports of the fixed reports.
+
 To investigate a rejected window, check its exact endpoints and each directed
 face's complete half-open coverage. To investigate rejected internal consistency,
 inspect the source IDs and common interval in the ValueError. Do not replace

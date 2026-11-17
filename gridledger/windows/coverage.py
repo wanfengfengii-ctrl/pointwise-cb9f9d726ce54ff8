@@ -5,6 +5,23 @@ def clip_segments(records, a, b):
                 for r in records if r.start < b and r.end > a]
     return tuple(sorted(segments, key=lambda s: (s.start, s.end, s.record.source_id)))
 
+def merge_continuous(segments):
+    merged = []
+    for segment in segments:
+        if (merged and merged[-1].record.source_id == segment.record.source_id
+                and merged[-1].end == segment.start):
+            merged[-1] = ClippedSegment(segment.record, merged[-1].start, segment.end)
+        else:
+            merged.append(segment)
+    return merged
+
+def face_window_segments(fragments, a, b):
+    ordered = sorted((ClippedSegment(f.record, f.start, f.end) for f in fragments),
+                     key=lambda s: (s.start, s.end, s.record.source_id))
+    segments = [ClippedSegment(s.record, max(a, s.start), min(b, s.end))
+                for s in merge_continuous(ordered) if s.start < b and s.end > a]
+    return tuple(sorted(segments, key=lambda s: (s.start, s.end, s.record.source_id)))
+
 def require_exact_coverage(segments, a, b):
     cursor = a
     for segment in segments:

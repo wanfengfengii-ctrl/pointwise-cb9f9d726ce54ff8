@@ -46,6 +46,12 @@ from gridledger.observations.model. Use a service as a context manager, or close
   that grid; an explicit base_revision permits a fixed branch. Matching logical
   keys replace members; others are inherited. Every successful call creates a
   revision, including an empty or identical batch.
+* correct_fluxes(grid_id, fluxes, *, base_revision) returns a new integer
+  observation revision ID for a window correction of outward flow rates. The
+  explicit base revision is required. Each record covers the base revision's
+  effective observations on the same directed face over its half-open interval,
+  possibly spanning old sources or filling gaps; everything outside stays
+  inherited and mass members are unchanged. See FLUX_CORRECTIONS.md.
 * compile_window(grid_id, observation_id, a, b) returns an immutable, archived
   WindowPlan with an integer id. a and b are exact rational numbers and a<b.
 * audit(plan) accepts that WindowPlan or its archived integer ID and returns a
@@ -66,7 +72,9 @@ Logical mass keys are (grid,cell,time); logical flow keys are
 (grid,cell,side,start,end). Source IDs are global immutable record identities.
 A correction uses a new source ID; an existing source ID may only refer to
 identical content. Repeated keys in a batch, conflicting sources, wrong units
-or nonpositive intervals raise ValueError. A cell, side or grid reference outside
+or nonpositive intervals raise ValueError. A correction batch with
+positive-length overlaps on one directed face raises ValueError; touching
+intervals are legal. A cell, side or grid reference outside
 the specified grid raises KeyError. Invalid batches leave no partial records or
 revision. Imports may be incomplete for a particular window and never fill gaps,
 interpolate masses or implicitly split old intervals.

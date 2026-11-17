@@ -2,6 +2,6 @@
   "version": 1,
   "kind": "cli",
   "setup": [],
-  "verify": ["python3.11", "-B", "-m", "unittest", "discover", "-s", "tests", "-v"],
-  "demo": ["python3.11", "-B", "-m", "gridledger.delivery.service", "demo", "--example", "examples/two_cells.json"]
+  "verify": ["python3.11", "-B", "correction_cases.py", "--verify"],
+  "demo": ["python3.11", "-B", "correction_cases.py", "--demo"]
 }

@@ -1,7 +1,11 @@
 from contextlib import contextmanager
 import sqlite3
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+# 0: fresh archive; 1: V1 archive without observation_flux_fragments (opened
+# and upgraded in place); SCHEMA_VERSION: current. V1 code refuses version 2,
+# so archives written by this version are never misread by it.
+COMPATIBLE_SCHEMA_VERSIONS = (0, 1, SCHEMA_VERSION)
 TABLES = {
     "grid_revisions": "id INTEGER PRIMARY KEY, name TEXT NOT NULL, spec TEXT NOT NULL",
     "sources": """source_id TEXT PRIMARY KEY, grid_id INTEGER NOT NULL REFERENCES grid_revisions(id),
@@ -11,6 +15,10 @@ TABLES = {
         parent_id INTEGER REFERENCES observation_revisions(id)""",
     "observation_members": """revision_id INTEGER NOT NULL REFERENCES observation_revisions(id),
         source_id TEXT NOT NULL REFERENCES sources(source_id), PRIMARY KEY(revision_id, source_id)""",
+    "observation_flux_fragments": """revision_id INTEGER NOT NULL REFERENCES observation_revisions(id),
+        source_id TEXT NOT NULL REFERENCES sources(source_id),
+        start TEXT NOT NULL, end TEXT NOT NULL,
+        PRIMARY KEY(revision_id, source_id, start)""",
     "plans": """id INTEGER PRIMARY KEY, grid_id INTEGER NOT NULL REFERENCES grid_revisions(id),
         observation_id INTEGER NOT NULL REFERENCES observation_revisions(id), body TEXT NOT NULL""",
     "results": "id INTEGER PRIMARY KEY, plan_id INTEGER NOT NULL REFERENCES plans(id), header TEXT NOT NULL",
@@ -48,7 +56,7 @@ def table_signature(connection, name):
 
 def ensure_schema(connection):
     version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if version not in (0, SCHEMA_VERSION):
+    if version not in COMPATIBLE_SCHEMA_VERSIONS:
         raise ValueError("unsupported archive schema version")
     reference = sqlite3.connect(":memory:")
     try:

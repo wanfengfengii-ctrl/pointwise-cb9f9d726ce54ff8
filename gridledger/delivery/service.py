@@ -3,7 +3,7 @@ from gridledger.archive.grid_store import save_grid_revision, load_grid_revision
 from gridledger.archive.observation_store import (
     load_source_record, save_observation_revision, load_observation_revision)
 from gridledger.archive.plan_store import save_plan, load_plan, publish_result, load_result_rows
-from gridledger.observations.revisions import build_observation_revision
+from gridledger.observations.revisions import build_observation_revision, build_flux_correction
 from gridledger.windows.compiler import compile_window_plan
 from gridledger.windows.model import WindowPlan
 from gridledger.balances.execution import execute_balance
@@ -36,6 +36,18 @@ class LedgerService:
         sources = {sid: load_source_record(self.connection, sid)
                    for (sid,) in self.connection.execute("SELECT source_id FROM sources")}
         candidate = build_observation_revision(grid, previous, masses, fluxes, sources)
+        return save_observation_revision(self.connection, candidate).id
+
+    def correct_fluxes(self, grid_id, fluxes, *, base_revision):
+        if isinstance(base_revision, bool) or not isinstance(base_revision, int) or base_revision <= 0:
+            raise ValueError("base revision must be a positive integer")
+        grid = load_grid_revision(self.connection, grid_id)
+        base = load_observation_revision(self.connection, base_revision)
+        if base.grid_id != grid.id:
+            raise ValueError("base revision belongs to another grid")
+        sources = {sid: load_source_record(self.connection, sid)
+                   for (sid,) in self.connection.execute("SELECT source_id FROM sources")}
+        candidate = build_flux_correction(grid, base, fluxes, sources)
         return save_observation_revision(self.connection, candidate).id
 
     def compile_window(self, grid_id, observation_id, a, b):

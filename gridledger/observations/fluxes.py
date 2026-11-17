@@ -1,6 +1,6 @@
 from collections import defaultdict
 from gridledger.grids.faces import cell_face_uses
-from gridledger.observations.model import FluxRecord, FLUX_UNIT
+from gridledger.observations.model import FluxRecord, FluxFragment, FLUX_UNIT
 
 def validate_flux_batch(grid, records):
     seen = set()
@@ -27,4 +27,20 @@ def index_fluxes(records):
             for key, items in index.items()}
 
 def records_for_face(index, use):
+    return index.get((use.grid_id, use.cell_id, use.side), ())
+
+def effective_flux_fragments(observation):
+    if observation.flux_fragments is not None:
+        return observation.flux_fragments
+    return tuple(FluxFragment(record, record.start, record.end)
+                 for record in observation.fluxes)
+
+def index_flux_fragments(fragments):
+    index = defaultdict(list)
+    for fragment in fragments:
+        record = fragment.record
+        index[(record.grid_id, record.cell_id, record.side)].append(fragment)
+    return {key: tuple(items) for key, items in index.items()}
+
+def fragments_for_face(index, use):
     return index.get((use.grid_id, use.cell_id, use.side), ())
