@@ -1,0 +1,19 @@
+{
+  "grid": {"name": "estuary", "shape": [2, 1], "origin": [0, 0], "spacing": [1, 1]},
+  "masses": [
+    {"cell": [0, 0], "time": 0, "value": 10, "source": "left-start"},
+    {"cell": [0, 0], "time": 1, "value": 8, "source": "left-end"},
+    {"cell": [1, 0], "time": 0, "value": 10, "source": "right-start"},
+    {"cell": [1, 0], "time": 1, "value": 11, "source": "right-end"}
+  ],
+  "rates": [
+    {"cell": [0, 0], "side": "west", "rate": -1},
+    {"cell": [0, 0], "side": "east", "rate": 3},
+    {"cell": [0, 0], "side": "south", "rate": 0},
+    {"cell": [0, 0], "side": "north", "rate": 0},
+    {"cell": [1, 0], "side": "west", "rate": -3},
+    {"cell": [1, 0], "side": "east", "rate": 2},
+    {"cell": [1, 0], "side": "south", "rate": 0},
+    {"cell": [1, 0], "side": "north", "rate": 0}
+  ]
+}

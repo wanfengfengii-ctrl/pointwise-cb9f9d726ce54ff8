@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "verify": ["python3.11", "-B", "-m", "unittest", "discover", "-s", "tests", "-v"],
+  "demo": ["python3.11", "-B", "-m", "gridledger.delivery.service", "demo", "--example", "examples/two_cells.json"],
+  "checks": [
+    ["python3.11", "-B", "-m", "unittest", "discover", "-s", "tests", "-v"],
+    ["python3.11", "-B", "-m", "unittest", "-v", "tests.test_balance.TestUniformBalance.test_two_cells", "tests.test_delivery.TestResultDelivery.test_reopen_and_mutation"],
+    ["python3.11", "-B", "-m", "unittest", "-v", "tests.test_grids.TestGridAcceptance"],
+    ["python3.11", "-B", "-m", "unittest", "-v", "tests.test_windows.TestWindowIntegration.test_fractional_breakpoints", "tests.test_revisions.TestRevisionBinding.test_correction_keeps_old_plan"],
+    ["python3.11", "-B", "-m", "unittest", "-v", "tests.test_windows.TestWindowIntegration.test_missing_inputs", "tests.test_balance.TestUniformBalance.test_internal_face_conflict", "tests.test_publication.TestPublication.test_transaction_failure"]
+  ]
+}
